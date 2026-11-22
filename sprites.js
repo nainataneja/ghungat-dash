@@ -7,7 +7,7 @@ const P = {
 const R = (c, col, x, y, w, h) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
 const C = (c, col, x, y, r) => { c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); };
 const E = (c, col, x, y, rx, ry) => { c.fillStyle = col; c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, 7); c.fill(); };
-const T = (c, s, x, y, size, col, align) => { c.font = 'bold ' + size + 'px sans-serif'; c.fillStyle = col || P.dark; c.textAlign = align || 'center'; c.fillText(s, x, y); };
+const T = (c, s, x, y, size, col, align) => { c.font = 'bold ' + size + 'px sans-serif'; c.fillStyle = col || P.dark; c.textAlign = align || 'center'; c.fillText(s, Math.round(x), Math.round(y)); };
 const POLY = (c, col, pts) => { c.fillStyle = col; c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.closePath(); c.fill(); };
 
 

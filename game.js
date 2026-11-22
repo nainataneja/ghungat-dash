@@ -111,6 +111,7 @@ function update(dt) {
 // big readable name tags above every item
 const TAGS = { table: ['TABLE', 70], jhadu: ['JHADU', 90], bed: ['BED', 80], uncle: ['UNCLE', 110], brother: ['BHAIYA', 105], guests: ['MEHMAAN', 140], laundry: ['LAUNDRY', 105], salary: ['SALARY'], food: ['FOOD'], daylight: ['DAYLIGHT'] };
 function tag(it, sx) {
+  sx = Math.round(sx);
   const d = ITEMS[it.type], name = TAGS[it.type][0], y = d.k === 'up' ? G - CONFIG.pickupHeight - 52 : G - TAGS[it.type][1];
   const label = name + (d.delta ? (d.k === 'up' ? ' +' : ' -') + d.delta + 's' : '');
   c.font = 'bold 22px sans-serif'; const w = c.measureText(label).width + 18;
@@ -147,7 +148,7 @@ function drawVignette() { // the ghungat: she can't see what's ahead
   T(c, 'ghungat: ON. what lies ahead? who knows.', W - 160, 70, 11, 'rgba(255,255,255,0.7)');
 }
 function outline(s, x, y, size, fill, stroke, align) {
-  c.font = 'bold ' + size + 'px sans-serif'; c.textAlign = align || 'center'; c.lineWidth = 5; c.strokeStyle = stroke || '#fff'; c.strokeText(s, x, y); c.fillStyle = fill; c.fillText(s, x, y);
+  c.font = 'bold ' + size + 'px sans-serif'; c.textAlign = align || 'center'; x = Math.round(x); y = Math.round(y); c.lineWidth = 5; c.strokeStyle = stroke || '#fff'; c.lineJoin = 'round'; c.strokeText(s, x, y); c.fillStyle = fill; c.fillText(s, x, y);
 }
 function drawHud() {
   const low = timeLeft < 10 && Math.floor(clock * 4) % 2 === 0;
