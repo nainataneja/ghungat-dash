@@ -25,7 +25,6 @@ function drawBrother(c, x, y, t) { // babysit older brother: -2s
   E(c, P.dark, x - 7, y - 65, 8, 3); E(c, P.dark, x + 7, y - 65, 8, 3);
   R(c, P.white, x + 20, y - 52 + w, 8, 20); R(c, P.haldi, x + 20, y - 57 + w, 8, 6);
   R(c, P.dark, x - 34, y - 42, 16, 9); C(c, P.red, x - 28, y - 38, 2); C(c, P.haldi, x - 23, y - 38, 2);
-  T(c, 'MAGGI!', x, y - 100, 12, P.red);
 }
 function drawGuests(c, x, y, t) { // guests at home: -5s
   R(c, P.wood, x - 38, y - 96, 76, 96); R(c, '#F9EFD9', x - 32, y - 90, 64, 90);
@@ -50,14 +49,6 @@ function drawSalary(c, x, y, t) { // +2s
   E(c, P.white, x - 22, y - 6 - f, 14, 6); E(c, P.white, x + 22, y - 6 - f, 14, 6);
   R(c, P.cream, x - 18, y - 12, 36, 24); POLY(c, '#E8D3A2', [x - 18, y - 12, x + 18, y - 12, x, y + 2]);
   T(c, '₹', x, y + 11, 16, P.blue);
-}
-function drawFood(c, x, y, t) { // +5s
-  const b = Math.sin(t * 12);
-  C(c, P.dark, x - 20, y + 16, 8); C(c, P.dark, x + 20, y + 16, 8); C(c, P.steel, x - 20, y + 16, 3); C(c, P.steel, x + 20, y + 16, 3);
-  R(c, P.pink, x - 24, y + 4, 48, 8); R(c, P.dark, x + 14, y - 14, 3, 20);
-  R(c, P.marigold, x - 26, y - 22 + b, 26, 24); T(c, '🍛', x - 13, y - 3 + b, 15);
-  c.strokeStyle = P.dark; c.lineWidth = 2; c.beginPath(); c.moveTo(x + 12, y - 14); c.lineTo(x + 24, y - 14); c.stroke();
-  T(c, '~', x - 36, y - 2, 14, '#999'); T(c, '~', x - 40, y + 8, 14, '#999');
 }
 function drawDaylight(c, x, y, t) { // +3s
   const r = t * 2; c.strokeStyle = P.marigold; c.lineWidth = 4;
@@ -198,4 +189,16 @@ function drawTable(c, x, y) { // empty dining table: plates, no food
   R(c, P.steel, x - 6 - 6, y - 52, 8, 10); R(c, '#9AA3AD', x + 34, y - 48, 10, 6); // steel glass + empty bowl
   T(c, '🪰', x + 6, y - 64, 12);
   T(c, 'khaana?', x, y - 76, 12, P.red);
+}
+
+function drawFood(c, x, y, t) { // +5s: delivery scooter, big and red
+  c.save(); c.translate(x, y); c.scale(1.35, 1.35); const b = Math.sin(t * 12) * 1.5;
+  c.strokeStyle = '#888'; c.lineWidth = 2;
+  for (let i = 0; i < 3; i++) { c.beginPath(); c.moveTo(-58, -8 + i * 9); c.lineTo(-46 - (i % 2) * 6, -8 + i * 9); c.stroke(); }
+  C(c, P.dark, -24, 20, 9); C(c, P.dark, 24, 20, 9); C(c, P.steel, -24, 20, 3.5); C(c, P.steel, 24, 20, 3.5);
+  R(c, P.pink, -30, 5, 60, 10); R(c, P.pink, 16, -14, 8, 22); R(c, P.dark, 12, -18, 18, 3);
+  R(c, P.blue, -7, -18, 14, 24); C(c, P.skin, 0, -26, 7); C(c, P.red, 0, -29, 8); R(c, P.red, -8, -29, 16, 3);
+  R(c, P.red, -46, -28 + b, 28, 28); R(c, '#8E0C16', -46, -28 + b, 28, 6);
+  T(c, 'FOOD', -32, -6 + b, 10, P.white);
+  c.restore();
 }

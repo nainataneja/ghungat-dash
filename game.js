@@ -1,7 +1,7 @@
 // ===== TUNE THE GAME HERE =====
 const CONFIG = {
   timeLimit: 40,        // seconds on the clock
-  speed: 550,           // px/s run speed
+  speed: 500,           // px/s run speed
   courseSec: 25,        // course length in seconds of clean running (door position)
   jumpV: 800,           // jump power
   gravity: 2500,         // higher = shorter hops, so you can't just spam jump
@@ -24,7 +24,7 @@ const ITEMS = {
   guests:  { k: 'pen', w: 70,  h: 95, draw: drawGuests,  delta: 5, say: ['Beta, shaadi kab?', 'Chai banao!'] },
   laundry: { k: 'pen', w: 64,  h: 80, draw: drawLaundry, delta: 3, say: ['Sirf 4 loads aur...'] },
   salary:  { k: 'up',  w: 56,  h: 56, draw: drawSalary,  delta: 2, say: ['Apni kamaai!'] },
-  food:    { k: 'up',  w: 60,  h: 56, draw: drawFood,    delta: 5, say: ['Aaj khana nahi banega!'] },
+  food:    { k: 'up',  w: 80,  h: 70, draw: drawFood,    delta: 5, say: ['Aaj khana nahi banega!'] },
   daylight:{ k: 'up',  w: 56,  h: 56, draw: drawDaylight,delta: 3, say: ['Din thoda lamba ho gaya'] },
 };
 // [seconds into the course, item]. Edit freely.
@@ -99,6 +99,15 @@ function update(dt) {
   }
 }
 
+// big readable name tags above every item
+const TAGS = { table: ['TABLE', 70], jhadu: ['JHADU', 90], bed: ['BED', 80], uncle: ['UNCLE', 110], brother: ['BHAIYA', 105], guests: ['MEHMAAN', 140], laundry: ['LAUNDRY', 105], salary: ['SALARY'], food: ['FOOD'], daylight: ['DAYLIGHT'] };
+function tag(it, sx) {
+  const d = ITEMS[it.type], name = TAGS[it.type][0], y = d.k === 'up' ? G - CONFIG.pickupHeight - 52 : G - TAGS[it.type][1];
+  const label = name + (d.delta ? (d.k === 'up' ? ' +' : ' -') + d.delta + 's' : '');
+  c.font = 'bold 18px sans-serif'; const w = c.measureText(label).width + 16;
+  c.fillStyle = d.k === 'up' ? '#1E9E3A' : d.k === 'pen' ? '#D01818' : '#444'; c.fillRect(sx - w / 2, y - 18, w, 26);
+  c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(label, sx, y + 1);
+}
 function drawWorld() {
   const PW = 812, S = 440 / 260, off = camX * 0.5;
   for (let i = Math.floor(off / PW); i <= Math.floor(off / PW) + 1; i++) {
@@ -114,6 +123,7 @@ function drawWorld() {
     c.globalAlpha = it.hit ? 0.4 : 1;
     if (d.k === 'up') d.draw(c, sx, G - CONFIG.pickupHeight + Math.sin(clock * 4 + it.x) * 6, clock);
     else d.draw(c, sx, G, clock);
+    tag(it, sx);
     c.globalAlpha = 1;
   }
   const wob = stumble > 0 ? Math.sin(clock * 40) * 3 : 0;
