@@ -38,6 +38,15 @@ const COURSE = [
 const COURSE_BASE = 45; // COURSE times are written for a 45s course; they auto-scale to CONFIG.courseSec
 
 const cv = document.getElementById('cv'), c = cv.getContext('2d');
+// render at the screen's real resolution so text stays sharp (game logic still uses 960x540)
+let SC = 1;
+function fit() {
+  const cssW = Math.min(innerWidth, innerHeight * 16 / 9);
+  cv.style.width = cssW + 'px'; cv.style.height = cssW * 9 / 16 + 'px';
+  SC = Math.max(1, Math.min(3, cssW / W * (devicePixelRatio || 1)));
+  cv.width = Math.round(W * SC); cv.height = Math.round(H * SC);
+}
+fit(); addEventListener('resize', fit);
 let state = 'start', stateAt = 0, clock = 0;
 let react, loseLine, camX, timeLeft, h, vy, stumble, shake, pulse, items, popups, confetti, spare;
 
@@ -104,9 +113,9 @@ const TAGS = { table: ['TABLE', 70], jhadu: ['JHADU', 90], bed: ['BED', 80], unc
 function tag(it, sx) {
   const d = ITEMS[it.type], name = TAGS[it.type][0], y = d.k === 'up' ? G - CONFIG.pickupHeight - 52 : G - TAGS[it.type][1];
   const label = name + (d.delta ? (d.k === 'up' ? ' +' : ' -') + d.delta + 's' : '');
-  c.font = 'bold 18px sans-serif'; const w = c.measureText(label).width + 16;
-  c.fillStyle = d.k === 'up' ? '#1E9E3A' : d.k === 'pen' ? '#D01818' : '#444'; c.fillRect(sx - w / 2, y - 18, w, 26);
-  c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(label, sx, y + 1);
+  c.font = 'bold 22px sans-serif'; const w = c.measureText(label).width + 18;
+  c.fillStyle = d.k === 'up' ? '#1E9E3A' : d.k === 'pen' ? '#D01818' : '#444'; c.fillRect(sx - w / 2, y - 22, w, 32);
+  c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(label, sx, y + 2);
 }
 function drawWorld() {
   const PW = 812, S = 440 / 260, off = camX * 0.5;
@@ -157,6 +166,7 @@ function overlay(title, lines, color) {
   lines.forEach((l, i) => outline(l, W / 2, 230 + i * 34, i === lines.length - 1 ? 20 : 22, i === lines.length - 1 ? P.haldi : '#fff', '#000'));
 }
 function draw() {
+  c.setTransform(SC, 0, 0, SC, 0, 0);
   c.save(); c.clearRect(0, 0, W, H);
   if (shake > 0) c.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
   drawWorld(); drawVignette(); c.restore();
