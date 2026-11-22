@@ -155,7 +155,7 @@ function draw() {
     drawHeroine(c, W / 2, 470, clock, false);
   } else { drawHud(); }
   if (state === 'win') {
-    overlay('SOCIETY LEVEL UP!', ['Door: KHULI HAWA', 'Unlocked: Passport | Opinions | Sunday Mornings | Own Bank Account', 'Time left: ' + spare + 's. Chai can wait.', 'Level 2: the ghungat comes off. See what lies ahead.', 'Press SPACE to run again'], P.haldi);
+    overlay('SOCIETY LEVEL UP!', ['Unlocked: Opinions | Sunday Mornings | Own Bank Account', 'Time left: ' + spare + 's. Chai can wait.', 'Level 2: the ghungat comes off. See what lies ahead.', 'Press SPACE to run again'], P.haldi);
     confetti.forEach(p => R(c, p.col, p.x, p.y, 8, 5));
   }
   if (state === 'lose') overlay('TIME\'S UP!', ['Chai is ready though.', loseLine, 'Press SPACE to try again'], '#FF5555');
