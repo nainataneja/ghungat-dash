@@ -1,8 +1,8 @@
 // ===== TUNE THE GAME HERE =====
 const CONFIG = {
-  timeLimit: 60,        // seconds on the clock
-  speed: 340,           // px/s run speed
-  courseSec: 45,        // course length in seconds of clean running (door position)
+  timeLimit: 40,        // seconds on the clock
+  speed: 550,           // px/s run speed
+  courseSec: 25,        // course length in seconds of clean running (door position)
   jumpV: 820,           // jump power
   gravity: 2200,
   heroX: 200,           // hero's screen x
@@ -37,11 +37,11 @@ const COURSE = [
 
 const cv = document.getElementById('cv'), c = cv.getContext('2d');
 let state = 'start', stateAt = 0, clock = 0;
-let camX, timeLeft, h, vy, stumble, shake, pulse, items, popups, confetti, spare;
+let react, loseLine, camX, timeLeft, h, vy, stumble, shake, pulse, items, popups, confetti, spare;
 
 function reset() {
   camX = 0; timeLeft = CONFIG.timeLimit; h = 0; vy = 0; stumble = 0; shake = 0; pulse = 0;
-  popups = []; confetti = [];
+  popups = []; confetti = []; react = null;
   items = COURSE.map(([t, type]) => ({ type, x: t * CONFIG.speed, hit: false }));
 }
 reset();
@@ -66,7 +66,7 @@ cv.addEventListener('pointerdown', jump);
 function pop(text, col, x, y) { popups.push({ text, col, x, y, life: 1.6 }); }
 function hitItem(it) {
   const d = ITEMS[it.type], say = d.say[Math.floor(Math.random() * d.say.length)];
-  it.hit = true; pulse = 1;
+  it.hit = true; pulse = 1; react = { e: d.k === 'up' ? '😍' : d.k === 'pen' ? '😮‍💨' : '😵', life: 1.2 };
   if (d.k === 'up') { timeLeft += d.delta; pop('+' + d.delta + 's  ' + say, '#1E9E3A', CONFIG.heroX, G - 150); beep(880, 0.15, 'triangle'); beep(1170, 0.2, 'triangle'); }
   else if (d.k === 'pen') { timeLeft -= d.delta; shake = 12; pop('-' + d.delta + 's  ' + say, '#D01818', CONFIG.heroX, G - 150); beep(140, 0.3, 'sawtooth'); }
   else { timeLeft -= CONFIG.stumbleCost; stumble = CONFIG.stumbleSecs; shake = 7; pop('Oof! -' + CONFIG.stumbleCost + 's  ' + say, '#E07000', CONFIG.heroX, G - 150); beep(200, 0.2, 'square'); }
@@ -76,7 +76,7 @@ function update(dt) {
   clock += dt;
   popups.forEach(p => { p.life -= dt; p.y -= 40 * dt; }); popups = popups.filter(p => p.life > 0);
   confetti.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; }); confetti = confetti.filter(p => p.y < H + 20);
-  shake = Math.max(0, shake - 40 * dt); pulse = Math.max(0, pulse - 3 * dt);
+  if (react) react.life -= dt; shake = Math.max(0, shake - 40 * dt); pulse = Math.max(0, pulse - 3 * dt);
   if (state !== 'play') return;
   timeLeft -= dt; stumble = Math.max(0, stumble - dt);
   camX += CONFIG.speed * (stumble > 0 ? CONFIG.stumbleSlow : 1) * dt;
@@ -90,7 +90,7 @@ function update(dt) {
     const top = d.k === 'up' ? G - CONFIG.pickupHeight - d.h / 2 : G - d.h, bot = d.k === 'up' ? top + d.h : G;
     if (Math.abs(sx - hx) < d.w / 2 + 12 && hTop < bot && hBot > top) hitItem(it);
   }
-  if (timeLeft <= 0) { timeLeft = 0; setState('lose'); beep(110, 0.6, 'sawtooth'); }
+  if (timeLeft <= 0) { timeLeft = 0; loseLine = ['Mehmaan abhi bhi baithe hain.', 'Bhaiya ka Maggi abhi bhi pending hai.', 'Kapde sukhne ka time ho gaya. Tumhara nahi.', 'Dinner kya banega? (Aapko pata hai.)'][Math.floor(Math.random() * 4)]; setState('lose'); beep(110, 0.6, 'sawtooth'); }
   else if (camX >= CONFIG.courseSec * CONFIG.speed - 30) {
     spare = Math.ceil(timeLeft); setState('win'); beep(660, 0.2); beep(880, 0.2); beep(1320, 0.4);
     for (let i = 0; i < 120; i++) confetti.push({ x: Math.random() * W, y: -Math.random() * 200, vx: (Math.random() - 0.5) * 120, vy: 60 + Math.random() * 200, col: ['#F4A300', '#E0218A', '#00657F', '#FFD23F'][i % 4] });
@@ -117,6 +117,7 @@ function drawWorld() {
   const wob = stumble > 0 ? Math.sin(clock * 40) * 3 : 0;
   E(c, 'rgba(0,0,0,0.2)', CONFIG.heroX, G, 22 - h / 10, 5);
   drawHeroine(c, CONFIG.heroX + wob, G - h, clock, h > 0);
+  if (react && react.life > 0) { const bx = CONFIG.heroX + 36, by = G - h - 124; C(c, '#fff', bx - 22, by + 30, 3); C(c, '#fff', bx - 14, by + 20, 5); E(c, '#fff', bx, by, 22, 17); c.strokeStyle = '#999'; c.lineWidth = 1; c.beginPath(); c.ellipse(bx, by, 22, 17, 0, 0, 7); c.stroke(); T(c, react.e, bx, by + 8, 22); }
 }
 function drawVignette() { // the ghungat: she can't see what's ahead
   const g = c.createLinearGradient(W * CONFIG.vignetteStart, 0, W, 0);
@@ -152,10 +153,10 @@ function draw() {
     drawHeroine(c, W / 2, 470, clock, false);
   } else { drawHud(); }
   if (state === 'win') {
-    overlay('SOCIETY LEVEL UP!', ['Door: APNI MARZI MAHAL', 'Unlocked: Passport | Opinions | Sunday Mornings | Own Bank Account', 'Time left: ' + spare + 's  (Sharma ji\'s bahu did it in 9s)', 'Level 2: the ghungat comes off. See what lies ahead.', 'Press SPACE to run again'], P.haldi);
+    overlay('SOCIETY LEVEL UP!', ['Door: KHULI HAWA', 'Unlocked: Passport | Opinions | Sunday Mornings | Own Bank Account', 'Time left: ' + spare + 's. Chai can wait.', 'Level 2: the ghungat comes off. See what lies ahead.', 'Press SPACE to run again'], P.haldi);
     confetti.forEach(p => R(c, p.col, p.x, p.y, 8, 5));
   }
-  if (state === 'lose') overlay('TIME\'S UP!', ['Chai is ready though.', 'Mehmaan abhi bhi baithe hain.', 'Press SPACE to try again (she has no choice)'], '#FF5555');
+  if (state === 'lose') overlay('TIME\'S UP!', ['Chai is ready though.', loseLine, 'Press SPACE to try again (she has no choice)'], '#FF5555');
 }
 let last = 0;
 function loop(ms) { const dt = Math.min(0.05, (ms - last) / 1000 || 0); last = ms; update(dt); draw(); requestAnimationFrame(loop); }

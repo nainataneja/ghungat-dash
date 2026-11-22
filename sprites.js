@@ -82,7 +82,7 @@ function drawDoor(c, x, y, t) {
   R(c, P.blue, x - 48, y - 150, 96, 150); R(c, P.haldi, x - 48, y - 150, 96, 6);
   c.fillStyle = '#FFF6D8'; c.beginPath(); c.moveTo(x - 36, y); c.lineTo(x - 36, y - 100); c.arc(x, y - 100, 36, Math.PI, 0); c.lineTo(x + 36, y); c.fill();
   for (let i = 0; i < 9; i++) { C(c, i % 2 ? P.marigold : P.pink, x - 36 + i * 9, y - 112 + Math.abs(i - 4) * -2 + 12, 5); }
-  T(c, 'APNI MARZI', x, y - 126, 11, P.haldi); T(c, 'MAHAL', x, y - 138, 11, P.haldi);
+  T(c, 'KHULI', x, y - 124, 13, P.haldi); T(c, 'HAWA', x, y - 138, 13, P.haldi);
   T(c, '✨', x, y - 60, 30);
 }
 
