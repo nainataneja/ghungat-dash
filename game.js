@@ -3,14 +3,14 @@ const CONFIG = {
   timeLimit: 40,        // seconds on the clock
   speed: 550,           // px/s run speed
   courseSec: 25,        // course length in seconds of clean running (door position)
-  jumpV: 760,           // jump power
-  gravity: 2800,         // higher = shorter hops, so you can't just spam jump
+  jumpV: 800,           // jump power
+  gravity: 2500,         // higher = shorter hops, so you can't just spam jump
   heroX: 200,           // hero's screen x
   pickupHeight: 170,    // how high power-ups float (needs a jump)
   stumbleSlow: 0.4,     // speed multiplier while stumbling
   stumbleSecs: 0.6,
   stumbleCost: 1,       // seconds lost for hitting a jump-over obstacle
-  vignetteStart: 0.6,   // ghungat covers screen from this fraction to the right edge
+  vignetteStart: 0.5,   // ghungat covers screen from this fraction to the right edge
 };
 const W = 960, H = 540, G = 440; // canvas size, ground y
 
@@ -33,8 +33,7 @@ const COURSE = [
   [15.6, 'uncle'], [17.4, 'brother'], [19.4, 'bed'], [21.4, 'guests'], [21.4, 'daylight'],
   [23.6, 'table'], [25.6, 'food'], [27.2, 'uncle'], [30, 'brother'], [33.6, 'guests'],
   [33.6, 'salary'], [35.6, 'bed'], [38.8, 'jhadu'], [41, 'laundry'], [43, 'food'],
-  [12.4, 'table'], [14.5, 'jhadu'], [24.6, 'laundry'], [26.4, 'bed'], [28.2, 'daylight'],
-  [31.8, 'jhadu'], [36.8, 'brother'], [39.9, 'guests'],
+  [24.6, 'laundry'], [28.2, 'daylight'], [36.8, 'brother'],
 ];
 const COURSE_BASE = 45; // COURSE times are written for a 45s course; they auto-scale to CONFIG.courseSec
 
@@ -124,7 +123,7 @@ function drawWorld() {
 }
 function drawVignette() { // the ghungat: she can't see what's ahead
   const g = c.createLinearGradient(W * CONFIG.vignetteStart, 0, W, 0);
-  g.addColorStop(0, 'rgba(120,20,80,0)'); g.addColorStop(0.5, 'rgba(120,20,80,0.6)'); g.addColorStop(1, 'rgba(50,5,40,0.95)');
+  g.addColorStop(0, 'rgba(120,20,80,0)'); g.addColorStop(0.3, 'rgba(120,20,80,0.8)'); g.addColorStop(0.55, 'rgba(60,8,50,1)'); g.addColorStop(1, 'rgba(40,4,35,1)');
   c.fillStyle = g; c.fillRect(W * CONFIG.vignetteStart, 0, W * (1 - CONFIG.vignetteStart), H);
   T(c, 'ghungat: ON. what lies ahead? who knows.', W - 160, 70, 11, 'rgba(255,255,255,0.7)');
 }
@@ -159,7 +158,7 @@ function draw() {
     overlay('SOCIETY LEVEL UP!', ['Door: KHULI HAWA', 'Unlocked: Passport | Opinions | Sunday Mornings | Own Bank Account', 'Time left: ' + spare + 's. Chai can wait.', 'Level 2: the ghungat comes off. See what lies ahead.', 'Press SPACE to run again'], P.haldi);
     confetti.forEach(p => R(c, p.col, p.x, p.y, 8, 5));
   }
-  if (state === 'lose') overlay('TIME\'S UP!', ['Chai is ready though.', loseLine, 'Press SPACE to try again (she has no choice)'], '#FF5555');
+  if (state === 'lose') overlay('TIME\'S UP!', ['Chai is ready though.', loseLine, 'Press SPACE to try again'], '#FF5555');
 }
 let last = 0;
 function loop(ms) { const dt = Math.min(0.05, (ms - last) / 1000 || 0); last = ms; update(dt); draw(); requestAnimationFrame(loop); }
