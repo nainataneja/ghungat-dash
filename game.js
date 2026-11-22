@@ -3,8 +3,8 @@ const CONFIG = {
   timeLimit: 40,        // seconds on the clock
   speed: 550,           // px/s run speed
   courseSec: 25,        // course length in seconds of clean running (door position)
-  jumpV: 820,           // jump power
-  gravity: 2200,
+  jumpV: 760,           // jump power
+  gravity: 2800,         // higher = shorter hops, so you can't just spam jump
   heroX: 200,           // hero's screen x
   pickupHeight: 170,    // how high power-ups float (needs a jump)
   stumbleSlow: 0.4,     // speed multiplier while stumbling
@@ -19,7 +19,7 @@ const ITEMS = {
   table:   { k: 'obs', w: 90,  h: 50, draw: drawTable,   say: ['Khaana kab banega?'] },
   jhadu:   { k: 'obs', w: 70,  h: 70, draw: drawJhadu,   say: ['Pocha baaki hai!'] },
   bed:     { k: 'obs', w: 90,  h: 50, draw: drawBed,     say: ['Bistar kaun lagayega?'] },
-  uncle:   { k: 'obs', w: 110, h: 75, draw: drawUncle,   say: ['Ek glass paani dena?'] },
+  uncle:   { k: 'obs', w: 110, h: 65, draw: drawUncle,   say: ['Ek glass paani dena?'] },
   brother: { k: 'pen', w: 44,  h: 80, draw: drawBrother, delta: 2, say: ['Bhaiya ko Maggi chahiye!'] },
   guests:  { k: 'pen', w: 70,  h: 95, draw: drawGuests,  delta: 5, say: ['Beta, shaadi kab?', 'Chai banao!'] },
   laundry: { k: 'pen', w: 64,  h: 80, draw: drawLaundry, delta: 3, say: ['Sirf 4 loads aur...'] },
@@ -33,7 +33,10 @@ const COURSE = [
   [15.6, 'uncle'], [17.4, 'brother'], [19.4, 'bed'], [21.4, 'guests'], [21.4, 'daylight'],
   [23.6, 'table'], [25.6, 'food'], [27.2, 'uncle'], [30, 'brother'], [33.6, 'guests'],
   [33.6, 'salary'], [35.6, 'bed'], [38.8, 'jhadu'], [41, 'laundry'], [43, 'food'],
+  [12.4, 'table'], [14.5, 'jhadu'], [24.6, 'laundry'], [26.4, 'bed'], [28.2, 'daylight'],
+  [31.8, 'jhadu'], [36.8, 'brother'], [39.9, 'guests'],
 ];
+const COURSE_BASE = 45; // COURSE times are written for a 45s course; they auto-scale to CONFIG.courseSec
 
 const cv = document.getElementById('cv'), c = cv.getContext('2d');
 let state = 'start', stateAt = 0, clock = 0;
@@ -42,7 +45,7 @@ let react, loseLine, camX, timeLeft, h, vy, stumble, shake, pulse, items, popups
 function reset() {
   camX = 0; timeLeft = CONFIG.timeLimit; h = 0; vy = 0; stumble = 0; shake = 0; pulse = 0;
   popups = []; confetti = []; react = null;
-  items = COURSE.map(([t, type]) => ({ type, x: t * CONFIG.speed, hit: false }));
+  items = COURSE.map(([t, type]) => ({ type, x: t / COURSE_BASE * CONFIG.courseSec * CONFIG.speed, hit: false }));
 }
 reset();
 function setState(s) { state = s; stateAt = clock; if (s === 'play') reset(); }
@@ -117,7 +120,7 @@ function drawWorld() {
   const wob = stumble > 0 ? Math.sin(clock * 40) * 3 : 0;
   E(c, 'rgba(0,0,0,0.2)', CONFIG.heroX, G, 22 - h / 10, 5);
   drawHeroine(c, CONFIG.heroX + wob, G - h, clock, h > 0);
-  if (react && react.life > 0) { const bx = CONFIG.heroX + 36, by = G - h - 124; C(c, '#fff', bx - 22, by + 30, 3); C(c, '#fff', bx - 14, by + 20, 5); E(c, '#fff', bx, by, 22, 17); c.strokeStyle = '#999'; c.lineWidth = 1; c.beginPath(); c.ellipse(bx, by, 22, 17, 0, 0, 7); c.stroke(); T(c, react.e, bx, by + 8, 22); }
+  if (react && react.life > 0) { const bx = CONFIG.heroX + 36, by = G - h - 124; C(c, '#fff', bx - 22, by + 30, 3); C(c, '#fff', bx - 14, by + 20, 5); E(c, '#fff', bx, by, 22, 17); c.strokeStyle = '#999'; c.lineWidth = 1; c.beginPath(); c.ellipse(bx, by, 22, 17, 0, 0, 7); c.stroke(); T(c, react.e, bx, by + 9, 26); }
 }
 function drawVignette() { // the ghungat: she can't see what's ahead
   const g = c.createLinearGradient(W * CONFIG.vignetteStart, 0, W, 0);
