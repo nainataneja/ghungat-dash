@@ -1,0 +1,41 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Ghungat Dash: sprite sheet</title>
+<style>body{margin:0;background:#2b2b2b;color:#fff;font:14px sans-serif;text-align:center}h1{margin:10px}canvas{background:#F6E7C8;display:block;margin:0 auto}</style></head>
+<body><h1>Ghungat Dash: sprite sheet</h1><canvas id="cv" width="1100" height="900"></canvas>
+<script src="sprites.js"></script>
+<script>
+const c = document.getElementById('cv').getContext('2d');
+const items = [ // [label, draw(c,x,y,t), isFloating]
+  ['HEROINE (running)', (c,x,y,t)=>drawHeroine(c,x,y,t,false)],
+  ['HEROINE (jumping)', (c,x,y,t)=>{const h=Math.abs(Math.sin(t*3))*45;E(c,'rgba(0,0,0,.2)',x,y,18-h/6,4);drawHeroine(c,x,y-h-8,t,true);}],
+  ['PENALTY -2s: Babysit bhaiya', drawBrother],
+  ['PENALTY -5s: Guests', drawGuests],
+  ['PENALTY -3s: Laundry', drawLaundry],
+  ['POWER +2s: Salary', (c,x,y,t)=>drawSalary(c,x,y-30,t), 1],
+  ['POWER +5s: Food delivery', (c,x,y,t)=>drawFood(c,x,y-30,t), 1],
+  ['POWER +3s: Extra daylight', (c,x,y,t)=>drawDaylight(c,x,y-30,t), 1],
+  ['JUMP: Uncle on couch', drawUncle],
+  ['JUMP: Jhadu + bucket', drawJhadu],
+  ['JUMP: Unmade bed', drawBed],
+  ['JUMP: Empty dining table', drawTable],
+  ['THE DOOR', drawDoor],
+];
+function frame(ms) {
+  const t = ms / 1000; c.clearRect(0, 0, 1100, 900); c.fillStyle = '#F6E7C8'; c.fillRect(0, 0, 1100, 900);
+  items.forEach((it, i) => {
+    const col = i % 5, row = Math.floor(i / 5), cx = 110 + col * 220, gy = 190 + row * 200;
+    c.fillStyle = '#9EC5D6'; c.fillRect(col * 220 + 5, row * 200 + 5, 210, 190);
+    R(c, P.floor, col * 220 + 5, gy, 210, 5);
+    it[1](c, cx, gy, t);
+    T(c, it[0], cx, row * 200 + 20, 11, '#333');
+  });
+  // backgrounds + floor strip, scaled to half
+  const by = 610;
+  c.save(); c.scale(0.5, 0.5); drawBgKitchen(c, 40, by * 2 - 80); drawBgUtility(c, 560, by * 2 - 80); c.restore();
+  c.save(); c.scale(0.5, 0.5); c.restore();
+  drawFloor(c, 20, by + 100, 1060, 40, t * 100);
+  T(c, 'BACKGROUND: kitchen (left) / utility room (right) + tiled floor', 550, by - 12, 12, '#333');
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>
