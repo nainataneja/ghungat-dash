@@ -110,13 +110,11 @@ function update(dt) {
 
 // big readable name tags above every item
 const TAGS = { table: ['TABLE', 70], jhadu: ['JHADU', 90], bed: ['BED', 80], uncle: ['UNCLE', 110], brother: ['BHAIYA', 105], guests: ['MEHMAAN', 140], laundry: ['LAUNDRY', 105], salary: ['SALARY'], food: ['FOOD'], daylight: ['DAYLIGHT'] };
-function tag(it, sx) {
-  sx = Math.round(sx);
-  const d = ITEMS[it.type], name = TAGS[it.type][0], y = d.k === 'up' ? G - CONFIG.pickupHeight - 52 : G - TAGS[it.type][1];
-  const label = name + (d.delta ? (d.k === 'up' ? ' +' : ' -') + d.delta + 's' : '');
-  c.font = 'bold 22px sans-serif'; const w = c.measureText(label).width + 18;
-  c.fillStyle = d.k === 'up' ? '#1E9E3A' : d.k === 'pen' ? '#D01818' : '#444'; c.fillRect(sx - w / 2, y - 22, w, 32);
-  c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(label, sx, y + 2);
+function label(it) { const d = ITEMS[it.type]; return TAGS[it.type][0] + (d.delta ? (d.k === 'up' ? ' +' : ' -') + d.delta + 's' : ''); }
+function tag(it, sx) { // moving text can't be read at speed, so items only get a colour-coded arrow; names show in the fixed banner
+  sx = Math.round(sx); const d = ITEMS[it.type], y = d.k === 'up' ? G - CONFIG.pickupHeight - 46 : G - TAGS[it.type][1] - 8;
+  c.fillStyle = d.k === 'up' ? '#1E9E3A' : d.k === 'pen' ? '#D01818' : '#444';
+  c.beginPath(); c.moveTo(sx - 12, y - 22); c.lineTo(sx + 12, y - 22); c.lineTo(sx, y); c.fill();
 }
 function drawWorld() {
   const PW = 812, S = 440 / 260, off = camX * 0.5;
@@ -159,6 +157,15 @@ function drawHud() {
   R(c, 'rgba(0,0,0,0.25)', W / 2 - 150, 80, 300, 8); R(c, P.pink, W / 2 - 150, 80, 300 * frac, 8);
   outline('GHAR', W / 2 - 170, 89, 11, P.dark, '#fff', 'right'); outline('SOCIETY', W / 2 + 170, 89, 11, P.dark, '#fff', 'left');
   outline('LEVEL 1: Ghar ka Kaam', 16, 28, 16, P.red, '#fff', 'left');
+  // fixed banner: names the next item that has come out of the ghungat shadow (static text is readable)
+  let near = null;
+  for (const it of items) { const sx = it.x - camX + CONFIG.heroX; if (!it.hit && sx > CONFIG.heroX + 30 && sx < W * 0.68 && (!near || sx < near.sx)) near = { sx, it }; }
+  if (near && state === 'play') {
+    const names = items.filter(i => !i.hit && Math.abs(i.x - near.it.x) < 60).map(label).join('  &  ');
+    c.font = 'bold 28px sans-serif'; const w = c.measureText(names).width + 36;
+    const kind = ITEMS[near.it.type].k; c.fillStyle = kind === 'up' ? '#1E9E3A' : kind === 'pen' ? '#D01818' : '#444';
+    c.fillRect(Math.round(W / 2 - w / 2), 108, Math.round(w), 40); c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(names, W / 2, 138);
+  }
   for (const p of popups) { c.globalAlpha = Math.min(1, p.life); outline(p.text, Math.min(Math.max(p.x + 20, 160), W - 200), p.y, 22, p.col, '#fff'); c.globalAlpha = 1; }
 }
 function overlay(title, lines, color) {
