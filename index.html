@@ -1,9 +1,11 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><title>Ghungat Dash</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>html,body{margin:0;height:100%;background:#1d1020;display:flex;align-items:center;justify-content:center}
-canvas{max-width:100vw;max-height:100vh;aspect-ratio:16/9;background:#F6E7C8}</style></head>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<style>html,body{margin:0;height:100%;overflow:hidden;position:fixed;inset:0;width:100%;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;background:#1d1020;display:flex;align-items:center;justify-content:center}
+canvas{max-width:100vw;max-height:100vh;max-height:100dvh;touch-action:none;aspect-ratio:16/9;background:#F6E7C8}#rot{display:none;position:fixed;inset:0;background:#1d1020;color:#F6E7C8;font:bold 22px sans-serif;text-align:center;align-items:center;justify-content:center;padding:24px}
+@media (orientation:portrait) and (pointer:coarse){#rot{display:flex}}</style></head>
 <body><canvas id="cv" width="960" height="540"></canvas>
+<div id="rot">Rotate your phone sideways to play</div>
 <script src="sprites.js"></script>
 <script src="game.js"></script>
 </body></html>

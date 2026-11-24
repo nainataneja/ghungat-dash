@@ -10,6 +10,8 @@ const CONFIG = {
   stumbleSlow: 0.4,     // speed multiplier while stumbling
   stumbleSecs: 0.6,
   stumbleCost: 1,       // seconds lost for hitting a jump-over obstacle
+  maxScale: 3,          // max canvas render scale on desktop
+  maxScaleTouch: 2,     // lower cap on touch devices (saves battery/GPU)
   vignetteStart: 0.5,   // ghungat covers screen from this fraction to the right edge
 };
 const W = 960, H = 540, G = 440; // canvas size, ground y
@@ -40,13 +42,15 @@ const COURSE_BASE = 45; // COURSE times are written for a 45s course; they auto-
 const cv = document.getElementById('cv'), c = cv.getContext('2d');
 // render at the screen's real resolution so text stays sharp (game logic still uses 960x540)
 let SC = 1;
+const TOUCH = matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window;
 function fit() {
-  const cssW = Math.min(innerWidth, innerHeight * 16 / 9);
+  const vv = window.visualViewport, vw = vv ? vv.width : innerWidth, vh = vv ? vv.height : innerHeight;
+  const cssW = Math.min(vw, vh * 16 / 9);
   cv.style.width = cssW + 'px'; cv.style.height = cssW * 9 / 16 + 'px';
-  SC = Math.max(1, Math.min(3, cssW / W * (devicePixelRatio || 1)));
+  SC = Math.max(1, Math.min(TOUCH ? CONFIG.maxScaleTouch : CONFIG.maxScale, cssW / W * (devicePixelRatio || 1)));
   cv.width = Math.round(W * SC); cv.height = Math.round(H * SC);
 }
-fit(); addEventListener('resize', fit);
+fit(); addEventListener('resize', fit); addEventListener('orientationchange', () => setTimeout(fit, 200)); if (window.visualViewport) visualViewport.addEventListener('resize', fit);
 let state = 'start', stateAt = 0, clock = 0;
 let react, loseLine, camX, timeLeft, h, vy, stumble, shake, pulse, items, popups, confetti, spare;
 
@@ -61,7 +65,7 @@ function setState(s) { state = s; stateAt = clock; if (s === 'play') reset(); }
 // tiny beeps, no audio files
 let ac;
 function beep(f, d, type) {
-  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
     const o = ac.createOscillator(), g = ac.createGain(); o.type = type || 'square'; o.frequency.value = f;
     g.gain.value = 0.06; o.connect(g); g.connect(ac.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + d); o.stop(ac.currentTime + d);
   } catch (e) {}
@@ -72,7 +76,7 @@ function jump() {
   else if (clock - stateAt > 0.5) setState('play');
 }
 addEventListener('keydown', e => { if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) { e.preventDefault(); if (!e.repeat) jump(); } });
-cv.addEventListener('pointerdown', jump);
+cv.addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
 
 function pop(text, col, x, y) { popups.push({ text, col, x, y, life: 1.6 }); }
 function hitItem(it) {
@@ -179,14 +183,14 @@ function draw() {
   if (shake > 0) c.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
   drawWorld(); drawVignette(); c.restore();
   if (state === 'start') {
-    overlay('GHUNGAT DASH', ['60 seconds. 4 rooms. 0 help.', 'Jump over chores. Dodge relatives. Grab salary.', 'Reach the Society Level Up door.', 'Press SPACE to escape the ghar'], P.marigold);
+    overlay('GHUNGAT DASH', ['60 seconds. 4 rooms. 0 help.', 'Jump over chores. Dodge relatives. Grab salary.', 'Reach the Society Level Up door.', (TOUCH ? 'Tap' : 'Press SPACE') + ' to escape the ghar'], P.marigold);
     drawHeroine(c, W / 2, 470, clock, false);
   } else { drawHud(); }
   if (state === 'win') {
-    overlay('SOCIETY LEVEL UP!', ['Unlocked: Opinions | Sunday Mornings | Own Bank Account', 'Time left: ' + spare + 's. Chai can wait.', 'Level 2: the ghungat comes off. See what lies ahead.', 'Press SPACE to run again'], P.haldi);
+    overlay('SOCIETY LEVEL UP!', ['Unlocked: Opinions | Sunday Mornings | Own Bank Account', 'Time left: ' + spare + 's. Chai can wait.', 'Level 2: the ghungat comes off. See what lies ahead.', (TOUCH ? 'Tap' : 'Press SPACE') + ' to run again'], P.haldi);
     confetti.forEach(p => R(c, p.col, p.x, p.y, 8, 5));
   }
-  if (state === 'lose') overlay('TIME\'S UP!', ['Chai is ready though.', loseLine, 'Press SPACE to try again'], '#FF5555');
+  if (state === 'lose') overlay('TIME\'S UP!', ['Chai is ready though.', loseLine, (TOUCH ? 'Tap' : 'Press SPACE') + ' to try again'], '#FF5555');
 }
 let last = 0;
 function loop(ms) { const dt = Math.min(0.05, (ms - last) / 1000 || 0); last = ms; update(dt); draw(); requestAnimationFrame(loop); }
