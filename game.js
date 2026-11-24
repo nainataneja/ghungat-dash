@@ -32,9 +32,9 @@ const ITEMS = {
 // [seconds into the course, item]. Edit freely.
 const COURSE = [
   [5, 'table'], [7.6, 'jhadu'], [10.2, 'bed'], [11.2, 'salary'], [13.4, 'laundry'],
-  [15.6, 'uncle'], [17.4, 'brother'], [19.4, 'bed'], [21.4, 'guests'], [21.4, 'daylight'],
+  [15.6, 'uncle'], [17.4, 'brother'], [19.4, 'bed'], [16.5, 'daylight'], [21.4, 'guests'],
   [23.6, 'table'], [25.6, 'food'], [27.2, 'uncle'], [30, 'brother'], [33.6, 'guests'],
-  [33.6, 'salary'], [35.6, 'bed'], [38.8, 'jhadu'], [41, 'laundry'], [43, 'food'],
+  [35.6, 'bed'], [37.2, 'salary'], [38.8, 'jhadu'], [41, 'laundry'], [43, 'food'],
   [24.6, 'laundry'], [28.2, 'daylight'], [36.8, 'brother'],
 ];
 const COURSE_BASE = 45; // COURSE times are written for a 45s course; they auto-scale to CONFIG.courseSec
