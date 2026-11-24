@@ -76,7 +76,7 @@ function jump() {
   else if (clock - stateAt > 0.5) setState('play');
 }
 addEventListener('keydown', e => { if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) { e.preventDefault(); if (!e.repeat) jump(); } });
-cv.addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
+document.addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
 
 function pop(text, col, x, y) { popups.push({ text, col, x, y, life: 1.6 }); }
 function hitItem(it) {
