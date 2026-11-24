@@ -12,6 +12,8 @@ const CONFIG = {
   stumbleCost: 1,       // seconds lost for hitting a jump-over obstacle
   maxScale: 3,          // max canvas render scale on desktop
   maxScaleTouch: 2,     // lower cap on touch devices (saves battery/GPU)
+  popupSize: 32,        // reaction text size ("Beta, shaadi kab?")
+  popupSecs: 2.2,       // how long reaction text stays on screen
   vignetteStart: 0.5,   // ghungat covers screen from this fraction to the right edge
 };
 const W = 960, H = 540, G = 440; // canvas size, ground y
@@ -78,18 +80,18 @@ function jump() {
 addEventListener('keydown', e => { if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) { e.preventDefault(); if (!e.repeat) jump(); } });
 document.addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
 
-function pop(text, col, x, y) { popups.push({ text, col, x, y, life: 1.6 }); }
+function pop(text, col, x, y) { popups.push({ text, col, life: CONFIG.popupSecs }); }
 function hitItem(it) {
   const d = ITEMS[it.type], say = d.say[Math.floor(Math.random() * d.say.length)];
   it.hit = true; pulse = 1; react = { e: d.k === 'up' ? '😍' : d.k === 'pen' ? '😮‍💨' : '😵', life: 1.2 };
   if (d.k === 'up') { timeLeft += d.delta; pop('+' + d.delta + 's  ' + say, '#1E9E3A', CONFIG.heroX, G - 150); beep(880, 0.15, 'triangle'); beep(1170, 0.2, 'triangle'); }
   else if (d.k === 'pen') { timeLeft -= d.delta; shake = 12; pop('-' + d.delta + 's  ' + say, '#D01818', CONFIG.heroX, G - 150); beep(140, 0.3, 'sawtooth'); }
-  else { timeLeft -= CONFIG.stumbleCost; stumble = CONFIG.stumbleSecs; shake = 7; pop('Oof! -' + CONFIG.stumbleCost + 's  ' + say, '#E07000', CONFIG.heroX, G - 150); beep(200, 0.2, 'square'); }
+  else { timeLeft -= CONFIG.stumbleCost; stumble = CONFIG.stumbleSecs; shake = 7; pop('Oof! -' + CONFIG.stumbleCost + 's  ' + say, '#B85400', CONFIG.heroX, G - 150); beep(200, 0.2, 'square'); }
 }
 
 function update(dt) {
   clock += dt;
-  popups.forEach(p => { p.life -= dt; p.y -= 40 * dt; }); popups = popups.filter(p => p.life > 0);
+  popups.forEach(p => { p.life -= dt; }); popups = popups.filter(p => p.life > 0);
   confetti.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; }); confetti = confetti.filter(p => p.y < H + 20);
   if (react) react.life -= dt; shake = Math.max(0, shake - 40 * dt); pulse = Math.max(0, pulse - 3 * dt);
   if (state !== 'play') return;
@@ -170,7 +172,13 @@ function drawHud() {
     const kind = ITEMS[near.it.type].k; c.fillStyle = kind === 'up' ? '#1E9E3A' : kind === 'pen' ? '#D01818' : '#444';
     c.fillRect(Math.round(W / 2 - w / 2), 108, Math.round(w), 40); c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(names, W / 2, 138);
   }
-  for (const p of popups) { c.globalAlpha = Math.min(1, p.life); outline(p.text, Math.min(Math.max(p.x + 20, 160), W - 200), p.y, 22, p.col, '#fff'); c.globalAlpha = 1; }
+  const p = popups[popups.length - 1]; // newest reaction only: solid pill, fixed position, easy to read
+  if (p) {
+    c.globalAlpha = Math.min(1, p.life * 3); c.font = 'bold ' + CONFIG.popupSize + 'px sans-serif';
+    const w = Math.round(c.measureText(p.text).width + 44), h2 = CONFIG.popupSize + 24, x0 = Math.round(W / 2 - w / 2);
+    c.fillStyle = '#fff'; c.fillRect(x0 - 4, 164, w + 8, h2 + 8); c.fillStyle = p.col; c.fillRect(x0, 168, w, h2);
+    c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText(p.text, Math.round(W / 2), 168 + CONFIG.popupSize + 6); c.globalAlpha = 1;
+  }
 }
 function overlay(title, lines, color) {
   c.fillStyle = 'rgba(20,8,30,0.82)'; c.fillRect(0, 0, W, H);
