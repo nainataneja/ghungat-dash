@@ -15,6 +15,10 @@ const CONFIG = {
   popupSize: 32,        // reaction text size ("Beta, shaadi kab?")
   popupSecs: 2.2,       // how long reaction text stays on screen
   vignetteStart: 0.5,   // ghungat covers screen from this fraction to the right edge
+  analyticsOn: true,    // false = send nothing to PostHog
+  posthogKey: 'phc_zvqSxguhqawrskLzyerBZ5UhrVJBrvyF59qRqY3U8pGN', // public project key, safe in the page
+  posthogHost: 'https://eu.i.posthog.com',
+  posthogScript: 'https://eu-assets.i.posthog.com/static/array.js',
 };
 const W = 960, H = 540, G = 440; // canvas size, ground y
 
@@ -62,7 +66,27 @@ function reset() {
   items = COURSE.map(([t, type]) => ({ type, x: t / COURSE_BASE * CONFIG.courseSec * CONFIG.speed, hit: false }));
 }
 reset();
-function setState(s) { state = s; stateAt = clock; if (s === 'play') reset(); }
+function setState(s) { state = s; stateAt = clock; if (s === 'play') { reset(); track('game_start'); } }
+
+// analytics: events wait in a queue until PostHog loads. If it's blocked or fails, the game carries on.
+let phReady = false, phQueue = [];
+function send(name, props) { try { window.posthog.capture(name, props); } catch (e) {} }
+function track(name, props) {
+  if (!CONFIG.analyticsOn) return;
+  if (phReady) send(name, props); else if (phQueue.length < 100) phQueue.push([name, Object.assign({}, props)]);
+}
+if (CONFIG.analyticsOn) {
+  const s = document.createElement('script'); s.src = CONFIG.posthogScript; s.async = true;
+  s.onload = () => { try {
+    window.posthog.init(CONFIG.posthogKey, { api_host: CONFIG.posthogHost, person_profiles: 'identified_only', capture_pageview: true, capture_pageleave: true,
+      autocapture: false, disable_session_recording: true, disable_surveys: true, capture_heatmaps: false, capture_dead_clicks: false, capture_exceptions: false, capture_performance: false });
+    phReady = true; phQueue.forEach(([n, p]) => send(n, p)); phQueue = [];
+  } catch (e) {} };
+  document.head.appendChild(s);
+}
+function trackEnd(result) { // run_seconds is time actually played (the clock pauses while the tab is hidden)
+  track('game_over', { result, run_seconds: Math.round((clock - stateAt) * 10) / 10, progress_pct: Math.min(100, Math.round(camX / (CONFIG.courseSec * CONFIG.speed - 30) * 100)), time_left: Math.max(0, Math.ceil(timeLeft)) });
+}
 
 // tiny beeps, no audio files
 let ac;
@@ -107,9 +131,9 @@ function update(dt) {
     const top = d.k === 'up' ? G - CONFIG.pickupHeight - d.h / 2 : G - d.h, bot = d.k === 'up' ? top + d.h : G;
     if (Math.abs(sx - hx) < d.w / 2 + 12 && hTop < bot && hBot > top) hitItem(it);
   }
-  if (timeLeft <= 0) { timeLeft = 0; loseLine = ['Mehmaan abhi bhi baithe hain.', 'Bhaiya ka Maggi abhi bhi pending hai.', 'Kapde sukhne ka time ho gaya. Tumhara nahi.', 'Dinner kya banega? (Aapko pata hai.)'][Math.floor(Math.random() * 4)]; setState('lose'); beep(110, 0.6, 'sawtooth'); }
+  if (timeLeft <= 0) { timeLeft = 0; loseLine = ['Mehmaan abhi bhi baithe hain.', 'Bhaiya ka Maggi abhi bhi pending hai.', 'Kapde sukhne ka time ho gaya. Tumhara nahi.', 'Dinner kya banega? (Aapko pata hai.)'][Math.floor(Math.random() * 4)]; trackEnd('lose'); setState('lose'); beep(110, 0.6, 'sawtooth'); }
   else if (camX >= CONFIG.courseSec * CONFIG.speed - 30) {
-    spare = Math.ceil(timeLeft); setState('win'); beep(660, 0.2); beep(880, 0.2); beep(1320, 0.4);
+    spare = Math.ceil(timeLeft); trackEnd('win'); setState('win'); beep(660, 0.2); beep(880, 0.2); beep(1320, 0.4);
     for (let i = 0; i < 120; i++) confetti.push({ x: Math.random() * W, y: -Math.random() * 200, vx: (Math.random() - 0.5) * 120, vy: 60 + Math.random() * 200, col: ['#F4A300', '#E0218A', '#00657F', '#FFD23F'][i % 4] });
   }
 }
