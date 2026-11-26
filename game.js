@@ -215,7 +215,7 @@ function draw() {
   if (shake > 0) c.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
   drawWorld(); drawVignette(); c.restore();
   if (state === 'start') {
-    overlay('GHUNGAT DASH', ['60 seconds. 4 rooms. 0 help.', 'Jump over chores. Dodge relatives. Grab salary.', 'Reach the Society Level Up door.', (TOUCH ? 'Tap' : 'Press SPACE') + ' to escape the ghar'], P.marigold);
+    overlay('GHUNGAT DASH', [CONFIG.timeLimit + ' seconds. 4 rooms. 0 help.', 'Jump over chores. Dodge relatives. Grab salary.', 'Reach the Society Level Up door.', (TOUCH ? 'Tap' : 'Press SPACE') + ' to escape the ghar'], P.marigold);
     drawHeroine(c, W / 2, 470, clock, false);
   } else { drawHud(); }
   if (state === 'win') {

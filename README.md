@@ -1,6 +1,6 @@
 # Ghungat Dash
 
-A 60-second side-scrolling runner. She wears a saree with a ghungat, and the corridor is full of chores, relatives and laundry. Reach the door at the end before the clock runs out.
+A 40-second side-scrolling runner. She wears a saree with a ghungat, and the corridor is full of chores, relatives and laundry. Reach the door at the end before the clock runs out.
 
 ## How to launch the game
 
@@ -20,7 +20,7 @@ Open https://nainataneja.github.io/ghungat-dash/
 - Jump over chores, avoid relatives, grab power-ups.
 
 ## Rules
-- You have **60 seconds**. Reach the door before the clock hits zero.
+- You have **40 seconds**. Reach the door before the clock hits zero.
 - **Penalties** take time off the clock: Bhaiya -2s, Laundry -3s, Mehmaan -5s.
 - **Power-ups** add time (jump to catch them): Salary +2s, Daylight +3s, Food +5s.
 - **Chores** (couch uncle, jhadu, unmade bed, empty dining table) slow you down and cost 1s if you hit them.
